@@ -47,8 +47,24 @@ export default function ScenarioSelector({ onScenarioSelect }) {
 
       const sessionData = await response.json();
       
-      // Call parent's handler with the session data
-      onScenarioSelect(sessionData);
+      // Fetch the full scenario data to include guidance_cues
+      const scenarioResponse = await fetch(`/api/scenarios/info?id=${scenarioId}`);
+      if (!scenarioResponse.ok) {
+        throw new Error(`Error fetching scenario details: ${scenarioResponse.statusText}`);
+      }
+      
+      const scenarioDetails = await scenarioResponse.json();
+      const selectedScenario = scenarioDetails.scenarios.find(s => s.id === scenarioId);
+      
+      // Combine the session data with the full scenario data
+      const enhancedSessionData = {
+        ...sessionData,
+        scenario_title: selectedScenario?.title || 'Medical Communication Scenario',
+        scenario_data: selectedScenario
+      };
+      
+      // Call parent's handler with the enhanced session data
+      onScenarioSelect(enhancedSessionData);
     } catch (err) {
       console.error("Failed to start chat session:", err);
       setError(err.message);

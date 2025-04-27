@@ -50,21 +50,30 @@ async def get_scenarios():
     """Returns all available scenarios with full data"""
     return scenarios
 
-@router.get("/api/scenarios/info", response_model=ScenarioListResponse, tags=["scenarios"])
-async def get_scenarios_info():
-    """Returns a list of available scenarios with basic information"""
-    scenario_list = []
+@router.get("/api/scenarios/info", tags=["scenarios"])
+async def get_scenarios(id: str = None):
+    """Get information about available scenarios"""
+    # Get the list of scenarios
+    scenarios_list = []
     
-    for scenario_id, scenario_data in scenarios.items():
-        scenario_list.append(
-            ScenarioInfo(
-                id=scenario_data["id"],
-                title=scenario_data["title"],
-                description=scenario_data["description"]
-            )
-        )
+    for key, scenario in scenarios.items():
+        scenario_info = {
+            "id": scenario["id"],
+            "title": scenario["title"],
+            "description": scenario["description"],
+            "ai_role": scenario["ai_role"],
+            "communication_steps": scenario["communication_steps"],
+            "guidance_cues": scenario.get("guidance_cues", {})
+        }
+        
+        # If an ID was provided, only return that specific scenario
+        if id and (scenario["id"] == id or key == id):
+            return {"scenarios": [scenario_info]}
+            
+        scenarios_list.append(scenario_info)
     
-    return {"scenarios": scenario_list}
+    # Return the list of scenarios
+    return {"scenarios": scenarios_list}
 
 @router.get("/api/scenarios/{scenario_id}", tags=["scenarios"])
 async def get_scenario(scenario_id: str):

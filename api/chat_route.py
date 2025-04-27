@@ -62,6 +62,7 @@ class ChatMessage(BaseModel):
 class ChatStreamRequest(BaseModel):
     session_id: str
     message: str
+    current_step: int = 0
     model: str = "gpt-4o"
 
 @router.post("/api/start_chat", response_model=StartChatResponse, tags=["chat"])
@@ -106,7 +107,7 @@ async def start_chat(request: StartChatRequest):
         "communication_steps": target_scenario["communication_steps"]
     }
 
-def construct_system_prompt(scenario_data):
+def construct_system_prompt(scenario_data, current_step=None, current_guidance=""):
     """
     Construct a detailed system prompt based on the scenario data
     """
@@ -122,10 +123,20 @@ Focus on clear explanations, emotional support, and shared decision-making when 
 Maintain a professional, compassionate tone throughout the conversation.
 Respond to the patient's concerns directly and do not change the subject.
 """
+
+    # Add current step information if available
+    if current_step:
+        system_prompt += f"""
+Current communication step: {current_step}
+
+Step guidance: {current_guidance}
+
+Please focus on this communication step in your next response.
+"""
     
     # Add communication steps as guidelines if available
     if "communication_steps" in scenario_data and scenario_data["communication_steps"]:
-        system_prompt += "\n\nYou should follow these communication steps:\n"
+        system_prompt += "\n\nThe overall communication steps for this scenario are:\n"
         for i, step in enumerate(scenario_data["communication_steps"], 1):
             system_prompt += f"{i}. {step}\n"
             
@@ -230,6 +241,9 @@ async def stream_chat(request: ChatStreamRequest):
     if not session:
         raise HTTPException(status_code=404, detail="Chat session not found")
     
+    # Update the current step in the session
+    chat_state.update_step(request.session_id, request.current_step)
+    
     # Add the user message to the session
     chat_state.add_message(
         request.session_id,
@@ -242,8 +256,17 @@ async def stream_chat(request: ChatStreamRequest):
     # Get the scenario data
     scenario_data = session["scenario_data"]
     
-    # Construct the system prompt
-    system_prompt = construct_system_prompt(scenario_data)
+    # Get the current communication step
+    current_step_index = request.current_step
+    communication_steps = scenario_data.get("communication_steps", [])
+    current_step = communication_steps[current_step_index] if current_step_index < len(communication_steps) else None
+    
+    # Get the guidance cue for the current step
+    guidance_cues = scenario_data.get("guidance_cues", {})
+    current_guidance = guidance_cues.get(current_step, "") if current_step else ""
+    
+    # Construct the system prompt with current step information
+    system_prompt = construct_system_prompt(scenario_data, current_step, current_guidance)
     
     # Prepare the full message history for the API call
     messages = [{"role": "system", "content": system_prompt}]

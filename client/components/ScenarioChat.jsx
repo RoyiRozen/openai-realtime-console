@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, RotateCcw } from "react-feather";
+import { MessageSquare, RotateCcw, ArrowRight, Check } from "react-feather";
 import Button from "./Button";
 
 export default function ScenarioChat({ sessionData, onRestart }) {
@@ -7,6 +7,8 @@ export default function ScenarioChat({ sessionData, onRestart }) {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState([]);
   const messagesEndRef = useRef(null);
   const eventSourceRef = useRef(null);
 
@@ -20,6 +22,9 @@ export default function ScenarioChat({ sessionData, onRestart }) {
           content: sessionData.initial_prompt,
         },
       ]);
+      // Reset step tracking when a new scenario is loaded
+      setCurrentStep(0);
+      setCompletedSteps([]);
     }
   }, [sessionData]);
 
@@ -36,6 +41,28 @@ export default function ScenarioChat({ sessionData, onRestart }) {
       }
     };
   }, []);
+
+  // Advance to the next step
+  const advanceToNextStep = () => {
+    if (currentStep < (sessionData?.communication_steps?.length || 0) - 1) {
+      setCurrentStep(prev => prev + 1);
+    }
+  };
+
+  // Mark current step as completed
+  const markStepCompleted = () => {
+    if (!completedSteps.includes(currentStep)) {
+      setCompletedSteps(prev => [...prev, currentStep]);
+    }
+  };
+
+  // Get guidance cue for the current step
+  const getCurrentGuidanceCue = () => {
+    if (!sessionData?.scenario_data?.guidance_cues) return null;
+    
+    const stepName = sessionData.communication_steps[currentStep];
+    return sessionData.scenario_data.guidance_cues[stepName];
+  };
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
@@ -92,6 +119,7 @@ export default function ScenarioChat({ sessionData, onRestart }) {
         body: JSON.stringify({
           session_id: sessionData.session_id,
           message: userMessage.content,
+          current_step: currentStep,
           model: "gpt-4o"  // You can make this customizable
         }),
       });
@@ -138,6 +166,14 @@ export default function ScenarioChat({ sessionData, onRestart }) {
                     content: fullContent
                   }]);
                   setStreamingMessage("");
+                  
+                  // After AI responds, we'll handle step progression
+                  // For this simple version, we'll advance the step every 2 turns (user message + AI response)
+                  if (messages.length % 4 === 1) { // Every 2 exchanges (4 messages including both user and AI)
+                    markStepCompleted();
+                    advanceToNextStep();
+                  }
+                  
                   break;
                 }
               } catch (e) {
@@ -164,6 +200,12 @@ export default function ScenarioChat({ sessionData, onRestart }) {
         content: `Error: ${error.message}`
       }]);
     }
+  };
+
+  // Manually advance to next step
+  const handleAdvanceStep = () => {
+    markStepCompleted();
+    advanceToNextStep();
   };
 
   return (
@@ -221,8 +263,29 @@ export default function ScenarioChat({ sessionData, onRestart }) {
         </div>
       </div>
 
-      {/* Input area */}
+      {/* Input area with guidance */}
       <div className="border-t p-4">
+        {/* Current Step Guidance Cue */}
+        {sessionData?.communication_steps && sessionData?.communication_steps[currentStep] && (
+          <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-blue-800">
+                Current Step: {sessionData.communication_steps[currentStep]}
+              </h3>
+              <Button
+                onClick={handleAdvanceStep}
+                className="bg-blue-100 text-blue-700 text-xs py-1"
+                icon={<ArrowRight size={12} />}
+              >
+                Next Step
+              </Button>
+            </div>
+            {getCurrentGuidanceCue() && (
+              <p className="text-sm text-blue-700 mt-1">{getCurrentGuidanceCue()}</p>
+            )}
+          </div>
+        )}
+
         <div className="flex space-x-2">
           <input
             type="text"
@@ -248,16 +311,23 @@ export default function ScenarioChat({ sessionData, onRestart }) {
           </Button>
         </div>
         
-        {/* Communication steps guidance */}
+        {/* Communication steps progress */}
         {sessionData?.communication_steps && (
           <div className="mt-4">
-            <h3 className="text-sm font-semibold text-gray-600">Communication Steps:</h3>
+            <h3 className="text-sm font-semibold text-gray-600">Progress:</h3>
             <div className="flex flex-wrap gap-2 mt-2">
               {sessionData.communication_steps.map((step, index) => (
                 <span 
                   key={index}
-                  className="bg-gray-100 text-xs px-2 py-1 rounded-full"
+                  className={`text-xs px-2 py-1 rounded-full flex items-center ${
+                    index === currentStep
+                      ? 'bg-blue-500 text-white' 
+                      : completedSteps.includes(index)
+                        ? 'bg-green-100 text-green-800 border border-green-200'
+                        : 'bg-gray-100 text-gray-600'
+                  }`}
                 >
+                  {completedSteps.includes(index) && <Check size={12} className="mr-1" />}
                   {step}
                 </span>
               ))}
