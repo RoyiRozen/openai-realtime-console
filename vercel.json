@@ -12,7 +12,7 @@
     { "src": "/.*", "dest": "/index.html" }
   ],
   "env": {
-    "PYTHON_VERSION": "3.10",
+    "PYTHON_VERSION": "3.12",
     "NODE_ENV": "production"
   },
   "installCommand": "mv vercel-package.json package.json && npm install && cd api && pip install -r requirements.txt"
