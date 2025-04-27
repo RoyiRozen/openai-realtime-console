@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "npm run build:client",
-  "outputDirectory": "dist/client",
+  "buildCommand": "npm run build:client && node vercel-build.js",
+  "outputDirectory": "dist",
   "builds": [
     { "src": "api/vercel.py", "use": "@vercel/python@3.1.0" }
   ],
