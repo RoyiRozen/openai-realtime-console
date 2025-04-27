@@ -9,6 +9,7 @@ import time
 from openai import OpenAI, AsyncOpenAI
 import asyncio
 import async_timeout
+from dotenv import load_dotenv
 
 # Add the project root to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -41,7 +42,17 @@ except Exception as e:
         print("Using dummy test scenario in chat_route")
 
 import chat_state
-from app import client, async_client  # Import both clients from app.py
+
+# Load environment variables
+load_dotenv()
+
+# Initialize OpenAI clients directly instead of importing from app.py
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is not set")
+
+client = OpenAI(api_key=api_key)
+async_client = AsyncOpenAI(api_key=api_key)
 
 router = APIRouter()
 

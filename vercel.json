@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/client",
+  "builds": [
+    { "src": "api/app.py", "use": "@vercel/python@3.1.0" },
+    { "src": "package.json", "use": "@vercel/static-build" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "api/app.py" },
+    { "src": "/(.*\\.(js|css|ico|png|jpg|svg|json))", "dest": "/dist/client/$1" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/dist/client/index.html" }
+  ],
+  "env": {
+    "PYTHON_VERSION": "3.9",
+    "NODE_ENV": "production"
+  }
+} 
