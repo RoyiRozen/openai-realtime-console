@@ -43,14 +43,16 @@ except Exception as e:
 
 import chat_state
 
+# Initialize OpenAI clients directly
 # Load environment variables
 load_dotenv()
 
-# Initialize OpenAI clients directly instead of importing from app.py
+# Get API key from environment variables
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("OPENAI_API_KEY environment variable is not set")
 
+# Initialize OpenAI clients
 client = OpenAI(api_key=api_key)
 async_client = AsyncOpenAI(api_key=api_key)
 
