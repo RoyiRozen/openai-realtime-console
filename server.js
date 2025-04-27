@@ -6,6 +6,10 @@ import "dotenv/config";
 const app = express();
 const port = process.env.PORT || 3000;
 const apiKey = process.env.OPENAI_API_KEY;
+const apiPort = process.env.API_PORT || 8000;
+
+// Enable JSON parsing for request bodies
+app.use(express.json());
 
 // Configure Vite middleware for React client
 const vite = await createViteServer({
@@ -40,6 +44,28 @@ app.get("/token", async (req, res) => {
   }
 });
 
+// Proxy API requests to the FastAPI backend
+app.use('/api', async (req, res) => {
+  try {
+    const targetUrl = `http://localhost:${apiPort}${req.url}`;
+    
+    const response = await fetch(targetUrl, {
+      method: req.method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...req.headers,
+      },
+      body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
+    });
+    
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error(`API proxy error for ${req.url}:`, error);
+    res.status(500).json({ error: "Failed to proxy request to API server" });
+  }
+});
+
 // Render the React client
 app.use("*", async (req, res, next) => {
   const url = req.originalUrl;
@@ -61,4 +87,5 @@ app.use("*", async (req, res, next) => {
 
 app.listen(port, () => {
   console.log(`Express server running on *:${port}`);
+  console.log(`API requests proxied to localhost:${apiPort}`);
 });

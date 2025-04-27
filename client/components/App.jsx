@@ -3,11 +3,16 @@ import logo from "/assets/openai-logomark.svg";
 import EventLog from "./EventLog";
 import SessionControls from "./SessionControls";
 import ToolPanel from "./ToolPanel";
+import ScenarioSelector from "./ScenarioSelector";
+import ScenarioChat from "./ScenarioChat";
 
 export default function App() {
+  const [appMode, setAppMode] = useState("scenarios"); // "scenarios" or "realtime" or "chat"
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [events, setEvents] = useState([]);
   const [dataChannel, setDataChannel] = useState(null);
+  const [scenarioSession, setScenarioSession] = useState(null);
+  
   const peerConnection = useRef(null);
   const audioElement = useRef(null);
 
@@ -65,7 +70,7 @@ export default function App() {
       dataChannel.close();
     }
 
-    peerConnection.current.getSenders().forEach((sender) => {
+    peerConnection.current?.getSenders().forEach((sender) => {
       if (sender.track) {
         sender.track.stop();
       }
@@ -122,6 +127,18 @@ export default function App() {
     sendClientEvent({ type: "response.create" });
   }
 
+  // Handle scenario selection and start chat
+  function handleScenarioSelect(sessionData) {
+    setScenarioSession(sessionData);
+    setAppMode("chat");
+  }
+
+  // Reset to scenario selection mode
+  function handleRestartScenario() {
+    setScenarioSession(null);
+    setAppMode("scenarios");
+  }
+
   // Attach event listeners to the data channel when a new one is created
   useEffect(() => {
     if (dataChannel) {
@@ -148,33 +165,80 @@ export default function App() {
       <nav className="absolute top-0 left-0 right-0 h-16 flex items-center">
         <div className="flex items-center gap-4 w-full m-4 pb-2 border-0 border-b border-solid border-gray-200">
           <img style={{ width: "24px" }} src={logo} />
-          <h1>realtime console</h1>
+          <h1>
+            {appMode === "scenarios" && "MedComm - Medical Communication Training"}
+            {appMode === "chat" && "MedComm - Communication Scenario"}
+            {appMode === "realtime" && "Realtime Console"}
+          </h1>
+          
+          {/* Mode switcher */}
+          {!isSessionActive && !scenarioSession && (
+            <div className="ml-auto flex gap-2">
+              <button 
+                className={`px-3 py-1 text-sm rounded ${appMode === 'scenarios' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                onClick={() => setAppMode('scenarios')}
+              >
+                Scenarios
+              </button>
+              <button 
+                className={`px-3 py-1 text-sm rounded ${appMode === 'realtime' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                onClick={() => setAppMode('realtime')}
+              >
+                Realtime Console
+              </button>
+            </div>
+          )}
         </div>
       </nav>
+      
       <main className="absolute top-16 left-0 right-0 bottom-0">
-        <section className="absolute top-0 left-0 right-[380px] bottom-0 flex">
-          <section className="absolute top-0 left-0 right-0 bottom-32 px-4 overflow-y-auto">
-            <EventLog events={events} />
-          </section>
-          <section className="absolute h-32 left-0 right-0 bottom-0 p-4">
-            <SessionControls
-              startSession={startSession}
-              stopSession={stopSession}
-              sendClientEvent={sendClientEvent}
-              sendTextMessage={sendTextMessage}
-              events={events}
-              isSessionActive={isSessionActive}
+        {/* Scenario selection mode */}
+        {appMode === "scenarios" && (
+          <div className="flex justify-center items-start p-8">
+            <div className="w-full max-w-3xl bg-white rounded-lg shadow-lg overflow-hidden">
+              <ScenarioSelector onScenarioSelect={handleScenarioSelect} />
+            </div>
+          </div>
+        )}
+        
+        {/* Chat interface for selected scenario */}
+        {appMode === "chat" && scenarioSession && (
+          <div className="w-full h-full">
+            <ScenarioChat 
+              sessionData={scenarioSession} 
+              onRestart={handleRestartScenario}
             />
-          </section>
-        </section>
-        <section className="absolute top-0 w-[380px] right-0 bottom-0 p-4 pt-0 overflow-y-auto">
-          <ToolPanel
-            sendClientEvent={sendClientEvent}
-            sendTextMessage={sendTextMessage}
-            events={events}
-            isSessionActive={isSessionActive}
-          />
-        </section>
+          </div>
+        )}
+        
+        {/* Original Realtime Console */}
+        {appMode === "realtime" && (
+          <>
+            <section className="absolute top-0 left-0 right-[380px] bottom-0 flex">
+              <section className="absolute top-0 left-0 right-0 bottom-32 px-4 overflow-y-auto">
+                <EventLog events={events} />
+              </section>
+              <section className="absolute h-32 left-0 right-0 bottom-0 p-4">
+                <SessionControls
+                  startSession={startSession}
+                  stopSession={stopSession}
+                  sendClientEvent={sendClientEvent}
+                  sendTextMessage={sendTextMessage}
+                  events={events}
+                  isSessionActive={isSessionActive}
+                />
+              </section>
+            </section>
+            <section className="absolute top-0 w-[380px] right-0 bottom-0 p-4 pt-0 overflow-y-auto">
+              <ToolPanel
+                sendClientEvent={sendClientEvent}
+                sendTextMessage={sendTextMessage}
+                events={events}
+                isSessionActive={isSessionActive}
+              />
+            </section>
+          </>
+        )}
       </main>
     </>
   );
