@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, RotateCcw, ArrowRight, Check, Award } from "react-feather";
+import { MessageSquare, RotateCcw, ArrowRight, Check, Award, Flag } from "react-feather";
 import Button from "./Button";
 import EvaluationPanel from "./EvaluationPanel";
 
@@ -11,6 +11,8 @@ export default function ScenarioChat({ sessionData, onRestart }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [showEvaluation, setShowEvaluation] = useState(false);
+  const [evaluationData, setEvaluationData] = useState(null);
+  const [isEvaluating, setIsEvaluating] = useState(false);
   const messagesEndRef = useRef(null);
   const eventSourceRef = useRef(null);
 
@@ -210,6 +212,40 @@ export default function ScenarioChat({ sessionData, onRestart }) {
     advanceToNextStep();
   };
 
+  // Handle end scenario and get feedback
+  const handleEndScenario = async () => {
+    try {
+      setIsEvaluating(true);
+      
+      const response = await fetch('/api/evaluate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          session_id: sessionData.session_id
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error evaluating conversation: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      setEvaluationData(data);
+      setShowEvaluation(true);
+    } catch (error) {
+      console.error("Error getting feedback:", error);
+      // Show error message
+      setMessages(prev => [...prev, {
+        role: "system",
+        content: `Error getting feedback: ${error.message}`
+      }]);
+    } finally {
+      setIsEvaluating(false);
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-full">
       {/* Scenario information header */}
@@ -221,11 +257,20 @@ export default function ScenarioChat({ sessionData, onRestart }) {
           </div>
           <div className="flex gap-2">
             <Button 
+              onClick={handleEndScenario}
+              className="bg-green-600 text-white text-sm"
+              icon={<Flag size={14} />}
+              disabled={isEvaluating}
+            >
+              {isEvaluating ? "Getting Feedback..." : "End Scenario & Get Feedback"}
+            </Button>
+            <Button 
               onClick={() => setShowEvaluation(true)}
               className="bg-blue-500 text-white text-sm"
               icon={<Award size={14} />}
+              disabled={!evaluationData}
             >
-              Evaluate
+              View Feedback
             </Button>
             <Button 
               onClick={onRestart}
@@ -351,6 +396,7 @@ export default function ScenarioChat({ sessionData, onRestart }) {
       {showEvaluation && (
         <EvaluationPanel 
           sessionId={sessionData.session_id}
+          evaluationData={evaluationData}
           onClose={() => setShowEvaluation(false)}
         />
       )}

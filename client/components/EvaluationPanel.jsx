@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Award, CheckCircle, XCircle, BarChart2 } from "react-feather";
 import Button from "./Button";
 
-export default function EvaluationPanel({ sessionId, onClose }) {
-  const [evaluation, setEvaluation] = useState(null);
+export default function EvaluationPanel({ sessionId, evaluationData = null, onClose }) {
+  const [evaluation, setEvaluation] = useState(evaluationData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Update evaluation state when evaluationData prop changes
+  useEffect(() => {
+    if (evaluationData) {
+      setEvaluation(evaluationData);
+    }
+  }, [evaluationData]);
 
   const fetchEvaluation = async () => {
     try {
