@@ -8,6 +8,7 @@ import uvicorn
 # Import routers
 from scenarios_route import router as scenarios_router
 from chat_route import router as chat_router
+from evaluate_route import router as evaluate_router
 
 # Load environment variables from .env file
 load_dotenv()
@@ -29,6 +30,7 @@ app = FastAPI(title="MedComm API",
 # Include routers
 app.include_router(scenarios_router, tags=["Scenarios"])
 app.include_router(chat_router, tags=["Chat"])
+app.include_router(evaluate_router, tags=["Evaluation"])
 
 # Define request model
 class PromptRequest(BaseModel):

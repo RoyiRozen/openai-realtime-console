@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, RotateCcw, ArrowRight, Check } from "react-feather";
+import { MessageSquare, RotateCcw, ArrowRight, Check, Award } from "react-feather";
 import Button from "./Button";
+import EvaluationPanel from "./EvaluationPanel";
 
 export default function ScenarioChat({ sessionData, onRestart }) {
   const [messages, setMessages] = useState([]);
@@ -9,6 +10,7 @@ export default function ScenarioChat({ sessionData, onRestart }) {
   const [streamingMessage, setStreamingMessage] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([]);
+  const [showEvaluation, setShowEvaluation] = useState(false);
   const messagesEndRef = useRef(null);
   const eventSourceRef = useRef(null);
 
@@ -217,13 +219,22 @@ export default function ScenarioChat({ sessionData, onRestart }) {
           <div className="text-sm text-gray-600">
             Session ID: {sessionData?.session_id ? sessionData.session_id.substring(0, 8) + '...' : ''}
           </div>
-          <Button 
-            onClick={onRestart}
-            className="bg-gray-200 text-gray-800 text-sm"
-            icon={<RotateCcw size={14} />}
-          >
-            New Scenario
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => setShowEvaluation(true)}
+              className="bg-blue-500 text-white text-sm"
+              icon={<Award size={14} />}
+            >
+              Evaluate
+            </Button>
+            <Button 
+              onClick={onRestart}
+              className="bg-gray-200 text-gray-800 text-sm"
+              icon={<RotateCcw size={14} />}
+            >
+              New Scenario
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -335,6 +346,14 @@ export default function ScenarioChat({ sessionData, onRestart }) {
           </div>
         )}
       </div>
+
+      {/* Evaluation panel */}
+      {showEvaluation && (
+        <EvaluationPanel 
+          sessionId={sessionData.session_id}
+          onClose={() => setShowEvaluation(false)}
+        />
+      )}
     </div>
   );
 } 
