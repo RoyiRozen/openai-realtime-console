@@ -7,4 +7,10 @@ const path = fileURLToPath(import.meta.url);
 export default {
   root: join(dirname(path), "client"),
   plugins: [react()],
+  server: {
+    port: 3001,
+    ws: {
+      port: 24679 // Change from 24678 to something else
+    }
+  }
 };

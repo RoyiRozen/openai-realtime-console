@@ -4,16 +4,24 @@ import { createServer as createViteServer } from "vite";
 import "dotenv/config";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const apiKey = process.env.OPENAI_API_KEY;
 const apiPort = process.env.API_PORT || 8000;
+
+// Check if running in dev mode
+const isDev = process.argv.includes('--dev');
 
 // Enable JSON parsing for request bodies
 app.use(express.json());
 
 // Configure Vite middleware for React client
 const vite = await createViteServer({
-  server: { middlewareMode: true },
+  server: { 
+    middlewareMode: true,
+    hmr: { 
+      port: 24679 // Use a different port than the default 24678
+    }
+  },
   appType: "custom",
 });
 app.use(vite.middlewares);
@@ -85,7 +93,19 @@ app.use("*", async (req, res, next) => {
   }
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Express server running on *:${port}`);
   console.log(`API requests proxied to localhost:${apiPort}`);
+  
+  // Open a browser window in dev mode
+  if (isDev) {
+    try {
+      const url = `http://localhost:${port}`;
+      console.log(`Opening browser at ${url}...`);
+      // Use dynamic import for 'open' module
+      import('open').then(open => open.default(url));
+    } catch (error) {
+      console.error("Failed to open browser:", error);
+    }
+  }
 });
