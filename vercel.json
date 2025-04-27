@@ -1,12 +1,15 @@
 {
   "version": 2,
+  "buildCommand": "npm run build:client",
+  "outputDirectory": "dist/client",
   "builds": [
-    { "src": "api/vercel.py", "use": "@vercel/python@3.1.0" },
-    { "src": "server-vercel.js", "use": "@vercel/node" }
+    { "src": "api/vercel.py", "use": "@vercel/python@3.1.0" }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/vercel.py" },
-    { "src": "/(.*)", "dest": "/server-vercel.js" }
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/index.html" }
   ],
   "env": {
     "PYTHON_VERSION": "3.9",
