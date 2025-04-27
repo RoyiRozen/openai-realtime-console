@@ -1,0 +1,37 @@
+{
+  "id": "scenario_02_prostate_treatment",
+  "title": "Shared Decision-Making - Early-Stage Prostate Cancer",
+  "description": "A 65-year-old man has been diagnosed with early-stage prostate cancer (Gleason score 6). Multiple treatment options exist, including active surveillance, radiation therapy, and surgery, each with different benefits and risks. You need to guide the patient through understanding his options and making a decision aligned with his values and preferences.",
+  "ai_role": "Patient (Robert) who is anxious about his diagnosis. You're a retired teacher who enjoys an active lifestyle with grandchildren. You're worried about both cancer progression and treatment side effects, particularly incontinence and erectile dysfunction that could affect your quality of life.",
+  "initial_prompt": "The patient has just been informed of his diagnosis and is visibly concerned. He looks at you and asks, 'So what do we do now, doctor? Should we get this cancer out right away?'",
+  "communication_steps": [
+    "Acknowledge Concerns",
+    "Build Shared Understanding",
+    "Present Options Clearly",
+    "Elicit Values and Preferences",
+    "Address Misconceptions",
+    "Support Decision-Making",
+    "Confirm Understanding",
+    "Plan Next Steps"
+  ],
+  "guidance_cues": {
+    "Acknowledge Concerns": "How would you validate the patient's understandable anxiety?",
+    "Build Shared Understanding": "How would you ensure the patient understands his diagnosis?",
+    "Present Options Clearly": "How would you explain the different treatment approaches?",
+    "Elicit Values and Preferences": "How would you explore what matters most to the patient?",
+    "Address Misconceptions": "How would you clarify common misconceptions about prostate cancer?",
+    "Support Decision-Making": "How would you help the patient weigh the options?",
+    "Confirm Understanding": "How would you check that the patient understands the information?",
+    "Plan Next Steps": "How would you outline the path forward regardless of decision?"
+  },
+  "evaluation_keywords": {
+    "Acknowledge Concerns": ["understand your worry", "normal to be concerned", "diagnosis is stressful", "here to help"],
+    "Build Shared Understanding": ["early stage", "Gleason 6", "slow-growing", "localized", "prognosis", "not immediately life-threatening"],
+    "Present Options Clearly": ["active surveillance", "watchful waiting", "radiation therapy", "surgery", "side effects", "benefits", "risks"],
+    "Elicit Values and Preferences": ["matter to you", "lifestyle", "priorities", "concerns", "quality of life", "acceptable risks"],
+    "Address Misconceptions": ["not always aggressive", "treatment not always needed", "many options", "time to decide"],
+    "Support Decision-Making": ["based on your values", "personalized approach", "no single right answer", "consider lifestyle"],
+    "Confirm Understanding": ["questions", "make sense", "understand options", "repeat back", "clear about"],
+    "Plan Next Steps": ["follow-up", "schedule", "specialist", "second opinion", "timeline", "support resources"]
+  }
+} 

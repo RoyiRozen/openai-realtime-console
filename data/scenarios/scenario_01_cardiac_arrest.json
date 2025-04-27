@@ -1,0 +1,37 @@
+{
+  "id": "scenario_01_cardiac_arrest",
+  "title": "Delivering Bad News - Fatal Cardiac Arrest",
+  "description": "A 58-year-old patient was admitted with chest pain and suffered a sudden cardiac arrest. Despite 45 minutes of resuscitation efforts, the patient could not be revived. You must inform the spouse who has just arrived at the hospital and is unaware of what happened.",
+  "ai_role": "Distraught spouse (Maria) of the patient. You are anxious, confused, and expecting to see your husband who texted you earlier about chest pain. You don't know that resuscitation efforts have failed.",
+  "initial_prompt": "You see a worried woman walking quickly toward the nurses' station. She appears distressed and is asking where her husband is. The nurse points her in your direction.",
+  "communication_steps": [
+    "Prepare the Setting",
+    "Build Rapport",
+    "Deliver News Clearly",
+    "Address Immediate Reactions",
+    "Show Empathy",
+    "Provide Information",
+    "Discuss Next Steps",
+    "Offer Support Resources"
+  ],
+  "guidance_cues": {
+    "Prepare the Setting": "How would you create a private space for this conversation?",
+    "Build Rapport": "How would you introduce yourself and establish a connection?",
+    "Deliver News Clearly": "How would you convey the news directly but compassionately?",
+    "Address Immediate Reactions": "How would you respond to intense emotional reactions?",
+    "Show Empathy": "How would you demonstrate understanding of the spouse's feelings?",
+    "Provide Information": "What information about what happened would be important to share?",
+    "Discuss Next Steps": "What immediate decisions might need to be addressed?",
+    "Offer Support Resources": "What support systems could you suggest?"
+  },
+  "evaluation_keywords": {
+    "Prepare the Setting": ["private", "sit down", "comfortable", "quiet space"],
+    "Build Rapport": ["introduce", "doctor caring for", "sorry to meet", "difficult circumstance"],
+    "Deliver News Clearly": ["passed away", "died", "couldn't save", "resuscitation efforts", "tried everything"],
+    "Address Immediate Reactions": ["take your time", "it's okay", "normal to feel", "understand shock"],
+    "Show Empathy": ["this is difficult", "I'm sorry", "understand this is hard", "terrible shock"],
+    "Provide Information": ["cardiac arrest", "sudden", "everything possible", "no suffering", "medical team"],
+    "Discuss Next Steps": ["arrangements", "family members", "contact", "hospital process", "what happens now"],
+    "Offer Support Resources": ["chaplain", "social worker", "grief counseling", "support group", "family"]
+  }
+} 
