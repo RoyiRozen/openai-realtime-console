@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import uvicorn
 
+# Import routers
+from scenarios_route import router as scenarios_router
+from chat_route import router as chat_router
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -17,7 +21,13 @@ if not api_key:
 client = OpenAI(api_key=api_key)
 
 # Initialize FastAPI app
-app = FastAPI()
+app = FastAPI(title="MedComm API", 
+              description="API for medical communication training scenarios",
+              version="1.0")
+
+# Include routers
+app.include_router(scenarios_router, tags=["Scenarios"])
+app.include_router(chat_router, tags=["Chat"])
 
 # Define request model
 class PromptRequest(BaseModel):
@@ -27,7 +37,7 @@ class PromptRequest(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "OpenAI API Integration"}
+    return {"message": "MedComm API - Medical Communication Training"}
 
 @app.post("/api/test-openai")
 async def test_openai(request: PromptRequest):
