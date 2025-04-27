@@ -3,16 +3,17 @@
   "buildCommand": "npm run build:client && node vercel-build.js",
   "outputDirectory": "dist",
   "builds": [
-    { "src": "api/vercel.py", "use": "@vercel/python@3.1.0" }
+    { "src": "api/vercel.py", "use": "@vercel/python" },
+    { "src": "server-vercel.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/vercel.py" },
     { "src": "/assets/(.*)", "dest": "/assets/$1" },
     { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
+    { "src": "/(.*)", "dest": "/server-vercel.js" }
   ],
   "env": {
-    "PYTHON_VERSION": "3.12",
+    "PYTHON_VERSION": "3.10",
     "NODE_ENV": "production"
   },
   "installCommand": "mv vercel-package.json package.json && npm install && cd api && pip install -r requirements.txt"

@@ -30,3 +30,4 @@ env/
 ENV/
 *.so
 .Python
+.vercel
