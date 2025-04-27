@@ -1,0 +1,17 @@
+{
+  "name": "medcomm-vercel",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Medical Communication Training Platform",
+  "main": "server-vercel.js",
+  "scripts": {
+    "start": "node server-vercel.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "dotenv": "^16.4.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 

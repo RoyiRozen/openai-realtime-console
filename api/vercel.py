@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from openai import OpenAI, AsyncOpenAI
@@ -25,6 +26,15 @@ from .evaluate_route import router as evaluate_router
 app = FastAPI(title="MedComm API", 
               description="API for medical communication training scenarios",
               version="1.0")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Include routers
 app.include_router(scenarios_router, tags=["Scenarios"])
@@ -58,4 +68,9 @@ async def test_openai(request: PromptRequest):
             "model": request.model
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"OpenAI API error: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"OpenAI API error: {str(e)}")
+
+# Root path handler for Vercel
+@app.get("/api")
+def api_root():
+    return {"message": "MedComm API - Use the appropriate endpoints"} 
