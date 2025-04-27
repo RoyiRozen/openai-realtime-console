@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 import uvicorn
 
 # Import routers
@@ -17,8 +17,9 @@ api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("OPENAI_API_KEY environment variable is not set")
 
-# Initialize OpenAI client
+# Initialize OpenAI clients
 client = OpenAI(api_key=api_key)
+async_client = AsyncOpenAI(api_key=api_key)
 
 # Initialize FastAPI app
 app = FastAPI(title="MedComm API", 
